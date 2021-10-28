@@ -1,0 +1,12 @@
+version: '3'
+services:
+  redis-server:
+    image: 'redis'
+  server:
+    build: ./server
+    ports:
+      - "3001:3001"
+  client:
+    build: ./client
+    ports:
+      - "3000:3000"

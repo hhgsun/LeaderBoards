@@ -13,7 +13,11 @@ app.use(cors())
 app.use(bodyParser.json());
 
 app.get('/', (req, res) => {
-  res.json({ "message": "Hello!", "players_endpoint": "/players" });
+  res.json({
+    "message": "Hello!",
+    "players_endpoint": "/players",
+    "player_leaders": "/players/leaders/:limit"
+  });
 });
 
 // ROUTES

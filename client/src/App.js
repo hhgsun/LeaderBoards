@@ -6,7 +6,8 @@ import socketClient from "socket.io-client";
 import LoginBox from "./LoginBox";
 import PlayerActions from "./PlayerActions";
 
-const SOCKET_SERVER = process.env.SOCKET_SERVER ?? "ws://localhost:3001";
+const SOCKET_SERVER = process.env.REACT_APP_SOCKET_SERVER || "ws://localhost:3001";
+console.log("SOCKET_SERVER", SOCKET_SERVER);
 
 const App = () => {
   const [playerId, setStoragePlayerId] = useState(localStorage.getItem('playerId'));
@@ -19,10 +20,9 @@ const App = () => {
   const socket = socketClient(SOCKET_SERVER);
 
   useEffect(() => {
-
     if (playerId && playerId !== null && playerId !== "") {
 
-      socket.on('connection', () => console.log(`I'm connected with the back-end`));
+      socket.on('connect', () => console.log(`connected with server`));
 
       socket.on('leaders', (leadersData) => {
         socket.emit('playerRank', playerId);
@@ -58,6 +58,7 @@ const App = () => {
         className="table"
         scrollable="scrollable"
         data={[...leaders, ...[{}], ...players]}
+        style={{ minWidth: "450px" }}
       >
         <GridColumn field="rank" title="Rank" />
         <GridColumn field="_id" title="User ID" cell={(field) => {

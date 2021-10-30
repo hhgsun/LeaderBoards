@@ -9,6 +9,8 @@ const io = require('socket.io')(server, { cors: { origin: '*' } });
 const cron = require('node-cron');
 const { GAME_CYCLE_TIME, GAME_FINISH_ROUND } = require('./config');
 
+const SERVER_PORT = process.env.PORT || 3001;
+
 app.use(cors())
 app.use(bodyParser.json());
 
@@ -23,17 +25,15 @@ app.get('/', (req, res) => {
 // ROUTES
 require('./routes/player.routes.js')(app);
 
-server.listen(3001, function () {
-  console.log('HTTP server started on port 3001');
+server.listen(SERVER_PORT, '0.0.0.0', function () {
+  console.log(`HTTP server started on port ${SERVER_PORT}`);
 });
-
 
 // initial redis data and cron
 (async () => {
   await playerService.findAll();
 
   // https://crontab.guru/every-day // hergün olması için: "0 0 * * *"
-  // şuanda her 1 dk da tekrarlanıyor
   console.log("RUNING CRON DAY:", cacheService.scoresDay);
 
   cron.schedule(GAME_CYCLE_TIME, () => {

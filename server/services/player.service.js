@@ -4,7 +4,7 @@ const cacheService = require('../services/cache.service');
 const CACHE_ENABLE = true;
 
 exports.findAll = async () => {
-  if (CACHE_ENABLE) {
+  if (CACHE_ENABLE && cacheService.rClient.connected) {
     const cacheValue = await cacheService.getPlayers();
     if (cacheValue && cacheValue.length > 0) {
       console.log("Response from Redis");
@@ -26,7 +26,7 @@ exports.findAll = async () => {
 };
 
 exports.findOne = async (pid) => {
-  if (CACHE_ENABLE) {
+  if (CACHE_ENABLE && cacheService.rClient.connected) {
     const cacheValue = await cacheService.getPlayer(pid);
     if (cacheValue) {
       console.log("Response from Redis");
@@ -45,7 +45,7 @@ exports.findOne = async (pid) => {
 
 
 exports.findLeaders = async (limit) => {
-  if (CACHE_ENABLE) {
+  if (CACHE_ENABLE && cacheService.rClient.connected) {
     const cacheValue = await cacheService.getLeaders(limit);
     if (cacheValue && cacheValue.length > 0) {
       console.log("Response from Redis");
@@ -57,7 +57,7 @@ exports.findLeaders = async (limit) => {
 }
 
 exports.findPlayerRankAndRange = async (pid) => {
-  if (CACHE_ENABLE) {
+  if (CACHE_ENABLE && cacheService.rClient.connected) {
     const cacheValue = await cacheService.getPlayerRankAndRange(pid);
     if (cacheValue && cacheValue != null && cacheValue.length > 0) {
       console.log("Response from Redis");
@@ -71,7 +71,7 @@ exports.findPlayerRankAndRange = async (pid) => {
 exports.create = async (playerData) => {
   const newPlayer = new Player(playerData);
   return newPlayer.save().then(player => {
-    if (CACHE_ENABLE)
+    if (CACHE_ENABLE && cacheService.rClient.connected)
       cacheService.setPlayer(player._id, player._doc);
     return player._doc;
   });
@@ -81,7 +81,7 @@ exports.update = async (pid, playerData) => {
   return Player.findByIdAndUpdate(pid, playerData)
     .then(player => {
       const upData = { ...player._doc, ...playerData }
-      if (CACHE_ENABLE && player)
+      if (CACHE_ENABLE && player && cacheService.rClient.connected)
         cacheService.setPlayer(player._id, upData);
       return upData;
     });
@@ -90,7 +90,7 @@ exports.update = async (pid, playerData) => {
 exports.delete = async (pid) => {
   return Player.findByIdAndRemove(pid)
     .then(p => {
-      if (CACHE_ENABLE)
+      if (CACHE_ENABLE && cacheService.rClient.connected)
         cacheService.delPlayer(pid);
       return p;
     });

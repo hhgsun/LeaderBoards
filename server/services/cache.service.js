@@ -15,7 +15,8 @@ exports.getPlayers = async () => {
   return new Promise((resolve, reject) => {
     this.rClient.hgetall("player_profiles", (err, dataobj) => {
       if (err) {
-        return reject(err);
+        console.log(err);
+        return resolve([]);
       }
       const profiles = [];
       if (util.isObject(dataobj)) {
@@ -32,7 +33,8 @@ exports.getPlayer = async (pid) => {
   return new Promise((resolve, reject) => {
     this.rClient.hget('player_profiles', pid, async (err, player) => {
       if (err) {
-        reject(err);
+        console.log(err);
+        return resolve(null);
       }
       if (pid == null) {
         resolve(null)
@@ -50,7 +52,8 @@ exports.getLeaders = (limit) => {
   return new Promise((resolve, reject) => {
     this.rClient.ZREVRANGE("player_money_leaders", 0, parseInt(limit) - 1, async (err, pkeys) => {
       if (err) {
-        reject(err);
+        console.log(err);
+        return resolve([]);
       }
       const leaders = [];
       for (let i = 0; i < pkeys.length; i++) {
@@ -72,7 +75,8 @@ exports.getPlayerRankAndRange = async (pid) => {
     if (!pid) resolve([]);
     this.rClient.ZREVRANK("player_money_leaders", pid.toString(), async (err, specificRank) => {
       if (err) {
-        reject(err);
+        console.log(err);
+        return resolve([]);
       }
       let startRank = specificRank;
       if (startRank > 100) {
@@ -131,7 +135,8 @@ exports.getPlayerTotalScoreAndDailyDiff = (pid) => {
       .ZSCORE("players_scores::7", pid.toString())
       .exec((err, scores) => {
         if (err) {
-          reject(err);
+          console.log(err);
+          return resolve({ score: 0, dailyDiff: 0 });
         }
         let total = 0;
         scores.map(d => {
@@ -163,7 +168,8 @@ exports.getPlayersTotalScores = () => {
       .ZRANGE("players_scores::7", 0, -1, "WITHSCORES")
       .exec((err, tables) => {
         if (err) {
-          reject(err);
+          console.log(err);
+          return resolve([]);
         }
         const totalScores = [];
         // tables: [ ["key","score"], ["key","score"], ... ]

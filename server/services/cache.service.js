@@ -19,7 +19,7 @@ exports.getPlayers = async () => {
         return resolve([]);
       }
       const profiles = [];
-      if (util.isObject(dataobj)) {
+      if (dataobj && util.isObject(dataobj)) {
         for (const key in dataobj) {
           profiles.push(JSON.parse(dataobj[key]));
         }
@@ -36,7 +36,7 @@ exports.getPlayer = async (pid) => {
         console.log(err);
         return resolve(null);
       }
-      if (pid == null) {
+      if (pid == null || !player) {
         resolve(null)
       }
       const scoreAndDailyDiff = await this.getPlayerTotalScoreAndDailyDiff(pid);
@@ -56,15 +56,16 @@ exports.getLeaders = (limit) => {
         return resolve([]);
       }
       const leaders = [];
-      for (let i = 0; i < pkeys.length; i++) {
-        const pid = pkeys[i];
-        if (pid == null) {
-          return null;
+      if (pkeys)
+        for (let i = 0; i < pkeys.length; i++) {
+          const pid = pkeys[i];
+          if (pid == null) {
+            return null;
+          }
+          const player = await this.getPlayer(pkeys[i]);
+          const p = { ...player, rank: i + 1 };
+          leaders.push(p);
         }
-        const player = await this.getPlayer(pkeys[i]);
-        const p = { ...player, rank: i + 1 };
-        leaders.push(p);
-      }
       resolve(leaders);
     });
   });
@@ -89,11 +90,12 @@ exports.getPlayerRankAndRange = async (pid) => {
       }
       this.rClient.ZREVRANGE("player_money_leaders", startRank, stopRank, async (err, pkeys) => {
         const leaders = [];
-        for (let i = 0; i < pkeys.length; i++) {
-          const player = await this.getPlayer(pkeys[i]);
-          const p = { ...player, rank: startRank + i + 1 };
-          leaders.push(p);
-        }
+        if (pkeys)
+          for (let i = 0; i < pkeys.length; i++) {
+            const player = await this.getPlayer(pkeys[i]);
+            const p = { ...player, rank: startRank + i + 1 };
+            leaders.push(p);
+          }
         resolve(leaders);
       });
     });
